@@ -6,67 +6,46 @@
  *
  * Return: The number of characters printed (excluding the null byte)
  */
-
 int _printf(const char *format, ...)
 {
 	int char_print = 0;
+	char *string_arg;
+	char char_arg;
 	va_list args;
-	/* Check for NULL format string */
-	if (format == NULL)
-		return (-1);
-	/* Initialize the variable argument list */
-	va_start(args, format);
 
+	va_start(args, format); /* Initialize the variable argument list */
 	while (*format)
-	{ /* If not a format specifier, write the character */
-		if (*format != '%')
+	{ /* If a format specifier, write the character */
+		if (*format == '%')
 		{
-			write(1, format, 1);
-			char_print++;
-		}
-		else
-		{ /* Handle format specifiers */
 			format++; /* Move past '%' */
 			switch (*format)
 			{
-				case 'c':
-				{ /* Fetch char argument */
-					char c = va_arg(args, int);
-
-					write(1, &c, 1); /* Write the character */
-					char_print++;
+				case 'c':/* Fetch char argument */
+					char_arg = va_arg(args, int);
+					char_print += write(1, &char_arg, 1); /* Write the character */
 					break;
-				}
-				case 's':
-				{ /* Fetch string argument */
-					char *string = va_arg(args, char *);
-
-					if (string == NULL)
-						string = "(null)";
-					while (*string)
-					{ /* Write each character of the string */
-						write(1, string, 1);
-						string++;
-						char_print++;
-					}
+				case 's':/* Fetch string argument */
+					string_arg = va_arg(args, char *);
+					if (string_arg == NULL)
+						string_arg = "(null)"; /* Write each character of the string */
+					char_print += write(1, string_arg, _strlen(string_arg));
 					break;
-				}
-				case '%':
-				{ /* Write the '%' character */
-					write(1, "%", 1);
-					char_print++;
+				case '%':/* Write the '%' character */
+					char_print += write(1, "%", 1);
 					break;
-				}
-				default: /* Print the '%' character if unknown specifier */
-				write(1, "%", 1);
-				write(1, format, 1);
-				char_print += 2;
+				default:/* Print the '%' character if unknown specifier */
+				char_print += write(1, "%", 1);
+				char_print += write(1, &(*format), 1);
 				break;
 			}
 		}
+		else
+		{
+			char_print += write(1, &(*format), 1);
+		}
 		format++;
 	}
-
 	va_end(args); /* Clean up the variable argument list */
 	return (char_print);
 }
