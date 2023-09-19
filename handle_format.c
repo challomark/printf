@@ -9,7 +9,7 @@
 int handle_format_specifier(va_list args, const char **format)
 {
 	int char_print = 0;
-	char buffer[40]; /* Buffer to store the integer as a string */
+	char buffer[BUFFER_SIZE]; /* Buffer to store the integer as a string */
 	int len = 0;
 	int number;
 	unsigned int unint_num; /* Variable to store unsigned integer arguments */
