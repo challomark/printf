@@ -75,7 +75,32 @@ int handle_format_specifier(va_list args, const char **format)
 			write(1, "%", 1); /* Write the '%' character */
 			char_print++;
 			break;
-		default:
+			 case 'd':
+			 case 'i':
+			{
+				int num = va_arg(args, int); /* Fetch integer argument */
+				char buffer[12]; /* Buffer to store the integer as a string */
+				int len = 0;
+				if (num < 0)
+				{
+					write(1, "-", 1); /* Write the negative sign for negative numbers */
+					char_print++;
+					num = -num; /* Make num positive for conversion */
+				}
+				do
+				{
+					buffer[len++] = num % 10 + '0';
+					num /= 10;
+				} while (num > 0);
+				/* Write the digits in reverse order */
+				while (len > 0)
+				{
+					write(1, &buffer[--len], 1);
+					char_print++;
+				}
+				break;
+			}
+			 default:
 			write(1, "%", 1); /* Print the '%' character if unknown specifier */
 			write(1, *format, 1);
 			char_print += 2;
