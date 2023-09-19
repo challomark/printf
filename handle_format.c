@@ -12,28 +12,28 @@ int handle_format_specifier(va_list args, const char **format)
 	char buffer[12]; /* Buffer to store the integer as a string */
 	int len = 0;
 	int number;
-	unsigned int unint_num; /* Initialize a variable to store unsigned integer arguments */
+	int c;
+	unsigned int unint_num; /* Variable to store unsigned integer arguments */
+
 	(*format)++; /* Move past '%' */
+
 	switch (**format)
 	{
 		case 'c':
-			/* Handle character specifier */
-			char_print += write(1, &(va_arg(args, int)), 1); /* Write the character */
+			c = va_arg(args, int); /* Fetch char argument */
+			char_print += write(1, &c, 1); /* Write the char */
 			break;
 		case 's':
-			/* Handle string specifier */
 			char_print += write(1, va_arg(args, char *), 0); /* Write the string */
 			break;
 		case '%':
-			/* Handle '%' specifier */
 			char_print += write(1, "%", 1); /* Write '%' */
 			break;
 		case 'd':
 		case 'i':
-			/* Handle integer specifiers ('d' and 'i') */
 			number = va_arg(args, int); /* Get the integer argument */
-			char_print += number < 0 ? write(1, "-", 1) : 0; /* Write '-' for negative numbers */
-			number = number < 0 ? -number : number; /* Make num positive for conversion */
+			char_print += number < 0 ? write(1, "-", 1) : 0;
+			number = number < 0 ? -number : number;
 			do {
 				buffer[len++] = number % 10 + '0'; /* Extract and convert digits */
 				number /= 10;
@@ -44,7 +44,7 @@ int handle_format_specifier(va_list args, const char **format)
 			break;
 		case 'b':
 			/* Handle custom binary specifier '%b' */
-			unint_num = va_arg(args, unsigned int); /* Get the unsigned integer argument */
+			unint_num = va_arg(args, unsigned int);
 			if (unint_num == 0)
 			{
 				char_print += write(1, "0", 1); /* Handle the special case of 0 */
@@ -52,10 +52,14 @@ int handle_format_specifier(va_list args, const char **format)
 			}
 			while (unint_num > 0)
 			{
-				buffer[len++] = (unint_num & 1) + '0'; /* Extract and convert binary digits */
-		default:
-			/* Handle unknown specifier */
-			char_print += write(1, "%", 1) + write(1, *format, 1); /* Print the '%' character if unknown specifier */
+				buffer[len++] = (unint_num & 1) + '0';
+				unint_num >>= 1;
+			}
+			while (len > 0)
+				char_print += write(1, &buffer[--len], 1); /* In reverse order */
+			break;
+		default: /* Handle unknown specifier */
+			char_print += write(1, "%", 1) + write(1, *format, 1);
 	}
 	return (char_print);
 }

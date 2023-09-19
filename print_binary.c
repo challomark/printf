@@ -11,8 +11,8 @@ int print_binary(va_list args)
 	int len = 0;
 	/* Buffer to store the binary representation (up to 32 bits) */
 	char buffer[33];
-
-	char_print = 0;
+	int char_print = 0;
+	
 	unsigned int number = va_arg(args, unsigned int);
 
 	if (number == 0)
