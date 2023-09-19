@@ -5,6 +5,6 @@
 #include <unistd.h>
 
 int _printf(const char *format, ...);
-int _strlen(const char *string);
+int handle_format_specifier(va_list args, const char **format);
 
 #endif

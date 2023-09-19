@@ -9,43 +9,78 @@
 int _printf(const char *format, ...)
 {
 	int char_print = 0;
-	char *string_arg;
-	char char_arg;
 	va_list args;
 
 	va_start(args, format); /* Initialize the variable argument list */
+
+	if (format == NULL)
+		return (-1);
+
 	while (*format)
 	{ /* If a format specifier, write the character */
-		if (*format == '%')
+		if (*format != '%')
 		{
-			format++; /* Move past '%' */
-			switch (*format)
-			{
-				case 'c':/* Fetch char argument */
-					char_arg = va_arg(args, int);
-					char_print += write(1, &char_arg, 1); /* Write the character */
-					break;
-				case 's':/* Fetch string argument */
-					string_arg = va_arg(args, char *);
-					if (string_arg == NULL)
-						string_arg = "(null)"; /* Write each character of the string */
-					char_print += write(1, string_arg, _strlen(string_arg));
-					break;
-				case '%':/* Write the '%' character */
-					char_print += write(1, "%", 1);
-					break;
-				default:/* Print the '%' character if unknown specifier */
-				char_print += write(1, "%", 1);
-				char_print += write(1, &(*format), 1);
-				break;
-			}
+			/* If not a format specifier, write the character */
+			write(1, format, 1);
+			char_print++;
 		}
 		else
 		{
-			char_print += write(1, &(*format), 1);
+			/* Handle format specifiers and update count */
+			char_print += handle_format_specifier(args, &format);
 		}
 		format++;
 	}
 	va_end(args); /* Clean up the variable argument list */
+	return (char_print);
+}
+
+/**
+ * handle_format_specifier - Handles a format specifier and prints the value
+ * @args: The va_list containing the arguments
+ * @format: A pointer to the current position in the format string
+ *
+ * Return: The number of characters printed for this specifier
+ */
+int handle_format_specifier(va_list args, const char **format)
+{
+	int char_print = 0;
+	(*format)++; /* Move past '%' */
+
+	switch (**format)
+	{
+		case 'c':
+		{
+			char c = va_arg(args, int); /* Fetch char argument */
+
+			write(1, &c, 1); /* Write the character */
+			char_print++;
+			break;
+		}
+		case 's':
+		{
+			char *str = va_arg(args, char *); /* Fetch string argument */
+
+			if (str == NULL)
+				str = "(null)";
+			while (*str)
+			{
+				write(1, str, 1); /* Write each character of the string */
+				str++;
+				char_print++;
+			}
+			break;
+		}
+		case '%':
+			write(1, "%", 1); /* Write the '%' character */
+			char_print++;
+			break;
+		default:
+			write(1, "%", 1); /* Print the '%' character if unknown specifier */
+			write(1, *format, 1);
+			char_print += 2;
+			break;
+	}
+
 	return (char_print);
 }
