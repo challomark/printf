@@ -1,40 +1,4 @@
 #include "main.h"
-
-/**
- * _printf - This is a custom printf function
- * @format: The format string
- *
- * Return: The number of characters printed (excluding the null byte)
- */
-int _printf(const char *format, ...)
-{
-	int char_print = 0;
-	va_list args;
-
-	va_start(args, format); /* Initialize the variable argument list */
-
-	if (format == NULL)
-		return (-1);
-
-	while (*format)
-	{ /* If a format specifier, write the character */
-		if (*format != '%')
-		{
-			/* If not a format specifier, write the character */
-			write(1, format, 1);
-			char_print++;
-		}
-		else
-		{
-			/* Handle format specifiers and update count */
-			char_print += handle_format_specifier(args, &format);
-		}
-		format++;
-	}
-	va_end(args); /* Clean up the variable argument list */
-	return (char_print);
-}
-
 /**
  * handle_format_specifier - Handles a format specifier and prints the value
  * @args: The va_list containing the arguments
@@ -47,71 +11,51 @@ int handle_format_specifier(va_list args, const char **format)
 	int char_print = 0;
 	char buffer[12]; /* Buffer to store the integer as a string */
 	int len = 0;
-	int num;
-
+	int number;
+	unsigned int unint_num; /* Initialize a variable to store unsigned integer arguments */
 	(*format)++; /* Move past '%' */
-
 	switch (**format)
 	{
 		case 'c':
-		{
-			char c = va_arg(args, int); /* Fetch char argument */
-
-			write(1, &c, 1); /* Write the character */
-			char_print++;
+			/* Handle character specifier */
+			char_print += write(1, &(va_arg(args, int)), 1); /* Write the character */
 			break;
-		}
 		case 's':
-		{
-			char *str = va_arg(args, char *); /* Fetch string argument */
-
-			if (str == NULL)
-				str = "(null)";
-			while (*str)
-			{
-				write(1, str, 1); /* Write each character of the string */
-				str++;
-				char_print++;
-			}
+			/* Handle string specifier */
+			char_print += write(1, va_arg(args, char *), 0); /* Write the string */
 			break;
-		}
 		case '%':
-			write(1, "%", 1); /* Write the '%' character */
-			char_print++;
-			break;
-		case 'b':
-			/* Call the print_binary function */
-			char_print += print_binary(args);
+			/* Handle '%' specifier */
+			char_print += write(1, "%", 1); /* Write '%' */
 			break;
 		case 'd':
 		case 'i':
-		{
-			num = va_arg(args, int); /* Fetch integer argument */
-
-			if (num < 0)
-			{
-				write(1, "-", 1); /* Write the negative sign for negative numbers */
-				char_print++;
-				num = -num; /* Make num positive for conversion */
-			}
-
+			/* Handle integer specifiers ('d' and 'i') */
+			number = va_arg(args, int); /* Get the integer argument */
+			char_print += number < 0 ? write(1, "-", 1) : 0; /* Write '-' for negative numbers */
+			number = number < 0 ? -number : number; /* Make num positive for conversion */
 			do {
-				buffer[len++] = num % 10 + '0';
-				num /= 10;
-			} while (num > 0);
+				buffer[len++] = number % 10 + '0'; /* Extract and convert digits */
+				number /= 10;
+			} while (number > 0);
 			/* Write the digits in reverse order */
 			while (len > 0)
+				char_print += write(1, &buffer[--len], 1);
+			break;
+		case 'b':
+			/* Handle custom binary specifier '%b' */
+			unint_num = va_arg(args, unsigned int); /* Get the unsigned integer argument */
+			if (unint_num == 0)
 			{
-				write(1, &buffer[--len], 1);
-				char_print++;
+				char_print += write(1, "0", 1); /* Handle the special case of 0 */
+				break;
 			}
-			break;
-		}
+			while (unint_num > 0)
+			{
+				buffer[len++] = (unint_num & 1) + '0'; /* Extract and convert binary digits */
 		default:
-			write(1, "%", 1); /* Print the '%' character if unknown specifier */
-			write(1, *format, 1);
-			char_print += 2;
-			break;
+			/* Handle unknown specifier */
+			char_print += write(1, "%", 1) + write(1, *format, 1); /* Print the '%' character if unknown specifier */
 	}
 	return (char_print);
 }
