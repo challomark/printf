@@ -22,6 +22,8 @@ int handle_format_specifier(va_list args, const char **format)
 		case 'c':
 			/* Handle character specifier */
 			character = va_arg(args, int);
+			buffer[len++] = character;
+
 			char_print += write(1, &character, 1);
 			break;
 		case 's':
