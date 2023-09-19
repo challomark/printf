@@ -6,5 +6,6 @@
 
 int _printf(const char *format, ...);
 int handle_format_specifier(va_list args, const char **format);
+int print_binary(va_list args);
 
 #endif
