@@ -20,7 +20,6 @@ int handle_format_specifier(va_list args, const char **format)
 	switch (**format)
 	{
 		case 'c':
-			c = va_arg(args, int); /* Fetch char argument */
 			char_print += write(1, &c, 1); /* Write the char */
 			break;
 		case 's':
