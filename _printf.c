@@ -79,6 +79,10 @@ int handle_format_specifier(va_list args, const char **format)
 			write(1, "%", 1); /* Write the '%' character */
 			char_print++;
 			break;
+		case 'b':
+			/* Call the print_binary function */
+			char_print += print_binary(args);
+			break;
 		case 'd':
 		case 'i':
 		{
